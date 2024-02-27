@@ -1,26 +1,35 @@
 const Contact = require("../schemas/mongoSchema.js");
 
-const listContacts = async () => {
+const listContacts = async (owner) => {
   try {
-    const contacts = await Contact.find();
+    const contacts = await Contact.find({ owner });
     return contacts;
   } catch (error) {
     console.log(`Error: ${error}`);
   }
 };
 
-async function getContactById(id) {
+async function getContactById(contactId, userId) {
   try {
-    const contact = await Contact.findById(id);
+    const contact = await Contact.findById({ _id: contactId });
+    const contactOwner = contact.owner;
+
+    if (userId.toString() !== contactOwner.toString()) {
+      throw new Error("Not authorized. It is not your contact!");
+    }
     return contact || null;
   } catch (error) {
     return null;
   }
 }
 
-async function removeContact(id) {
+async function removeContact(contactId, userId) {
   try {
-    const removedContact = await Contact.findByIdAndDelete(id);
+    const removedContact = await Contact.findByIdAndDelete({ _id: contactId });
+    const contactOwner = removedContact.owner;
+    if (userId.toString() !== contactOwner.toString()) {
+      throw new Error("Not authorized. It is not your contact!");
+    }
     return removedContact || null;
   } catch (error) {
     return null;
@@ -36,9 +45,9 @@ async function addContact(name, email, phone) {
   }
 }
 
-async function updateContactService(id, name, email, phone) {
+async function updateContactService(contactId, name, email, phone) {
   try {
-    const existingContact = await Contact.findById(id);
+    const existingContact = await Contact.findById({ _id: contactId });
 
     if (!existingContact) {
       return null;
@@ -56,10 +65,10 @@ async function updateContactService(id, name, email, phone) {
   }
 }
 
-async function updateStatusContact(id, favorite) {
+async function updateStatusContact(contactId, favorite) {
   try {
     const updatedContact = await Contact.findByIdAndUpdate(
-      id,
+      contactId,
       { favorite },
       { new: true }
     );
