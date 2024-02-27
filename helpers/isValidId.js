@@ -3,11 +3,8 @@ const HttpError = require("./HttpError");
 
 const isValidId = (req, _, next) => {
   if (!isValidObjectId(req.params.id)) {
-    next(new HttpError(404));
-    return;
+    return next(new HttpError(404));
   }
-
-  next();
 };
 
 module.exports = isValidId;
