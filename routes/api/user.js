@@ -8,7 +8,7 @@ const {
 const validateBody = require("../../helpers/validateBody");
 const authenticate = require("../../services/authenticate");
 
-const { schemas } = require("../../schemas/authSchema");
+const schemas = require("../../schemas/authSchema");
 
 const authRouter = express.Router();
 

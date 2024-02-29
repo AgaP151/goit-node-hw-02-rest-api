@@ -1,83 +1,84 @@
 const Contact = require("../schemas/mongoSchema.js");
+const HttpError = require("../helpers/HttpError.js");
+const { updateContact } = require("../controllers/contactsControll.js");
 
-const listContacts = async (owner) => {
+const listContacts = async (userId) => {
   try {
-    const contacts = await Contact.find({ owner });
+    const contacts = await Contact.find({ owner: userId });
     return contacts;
   } catch (error) {
-    console.log(`Error: ${error}`);
+    throw HttpError(500, "Internal Server Error");
   }
 };
 
-async function getContactById(contactId, userId) {
+const getContactById = async (contactId, userId) => {
   try {
-    const contact = await Contact.findById({ _id: contactId });
-    const contactOwner = contact.owner;
-
-    if (userId.toString() !== contactOwner.toString()) {
-      throw new Error("Not authorized. It is not your contact!");
+    const contact = await Contact.findOne({ _id: contactId, owner: userId });
+    
+    if (!contact) {
+      throw Error(404, "Contact not found");
     }
-    return contact || null;
+    return contact;
   } catch (error) {
-    return null;
+    throw HttpError(500, "Internal Server Error");
   }
 }
 
-async function removeContact(contactId, userId) {
+const removeContact = async (contactId, userId) => {
   try {
-    const removedContact = await Contact.findByIdAndDelete({ _id: contactId });
-    const contactOwner = removedContact.owner;
-    if (userId.toString() !== contactOwner.toString()) {
-      throw new Error("Not authorized. It is not your contact!");
+    const removedContact = await Contact.findOneAndDelete({
+      _id: contactId,
+      owner: userId,
+    });
+    if (!removeContact) {
+      throw Error(404, "Contact not found");
     }
-    return removedContact || null;
+    return removedContact;
   } catch (error) {
-    return null;
+    throw HttpError(500, "Internal Server Error");
   }
-}
+};
 
-async function addContact(name, email, phone) {
+const addContact = async (name, email, phone, userId) => {
   try {
-    const newContact = await Contact.create({ name, email, phone });
+    const newContact = await Contact.create({ name, email, phone, owner: userId });
     return newContact;
   } catch (error) {
-    return null;
+     throw HttpError(500, "Internal Server Error");
   }
 }
 
-async function updateContactService(contactId, name, email, phone) {
+const updateContactService = async (contactId, name, email, phone, userId) => {
   try {
-    const existingContact = await Contact.findById({ _id: contactId });
-
+    const existingContact = await Contact.findOneAndUpdate(
+      { _id: contactId, owner: userId },
+      { name, email, phone },
+      { new: true }
+    );
     if (!existingContact) {
-      return null;
+      throw Error(404, "Contact not found");
     }
-
-    existingContact.name = name || existingContact.name;
-    existingContact.email = email || existingContact.email;
-    existingContact.phone = phone || existingContact.phone;
-
-    await existingContact.save();
-
     return existingContact;
   } catch (error) {
-    return null;
+    throw HttpError(500, "Internal Server Error");
   }
-}
+};
 
-async function updateStatusContact(contactId, favorite) {
+const updateStatusContact = async (contactId, favorite, userId) => {
   try {
-    const updatedContact = await Contact.findByIdAndUpdate(
-      contactId,
+    const updatedContact = await Contact.findOneAndUpdate(
+      { _id: contactId, owner: userId },
       { favorite },
       { new: true }
     );
+    if (!updateContact) {
+      throw Error(404, "Contact not found");
+    }
     return updatedContact;
   } catch (error) {
-    console.error(`Error updating contact status: ${error}`);
-    return null;
+    throw HttpError(500, "Internal Server Error");
   }
-}
+};
 
 module.exports = {
   listContacts,

@@ -14,7 +14,8 @@ const {
 
 const listContactsAll = async (req, res, next) => {
   try {
-    const contacts = await listContacts();
+    const userId = req.user._id;
+    const contacts = await listContacts(userId);
     res.status(200).json(contacts);
   } catch (error) {
     next(error);
@@ -23,7 +24,8 @@ const listContactsAll = async (req, res, next) => {
 
 const getOneContact = async (req, res) => {
   const { id } = req.params;
-  const contact = await getContactById(id);
+  const userId = req.user._id;
+  const contact = await getContactById(id, userId);
   if (contact) {
     res.status(200).json(contact);
   } else {
@@ -33,7 +35,8 @@ const getOneContact = async (req, res) => {
 
 const deleteContact = async (req, res) => {
   const { id } = req.params;
-  const deletedContact = await removeContact(id);
+  const userId = req.user._id;
+  const deletedContact = await removeContact(id, userId);
   if (deletedContact) {
     res.status(200).json(deletedContact);
   } else {
@@ -43,19 +46,21 @@ const deleteContact = async (req, res) => {
 
 const createContact = async (req, res) => {
   const { name, email, phone } = req.body;
+  const userId = req.user._id;
 
   const { error } = createContactSchema.validate({ name, email, phone });
   if (error) {
     return res.status(400).json({ message: error.message });
   }
 
-  const newContact = await addContact(name, email, phone);
+  const newContact = await addContact(name, email, phone, userId);
   res.status(201).json(newContact);
 };
 
 const updateContact = async (req, res) => {
   const { id } = req.params;
   const { name, email, phone } = req.body;
+  const userId = req.user._id;
 
   if (!name && !email && !phone && Object.keys(req.body).length === 0) {
     return res
@@ -68,7 +73,13 @@ const updateContact = async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 
-  const updatedContact = await updateContactService(id, name, email, phone);
+  const updatedContact = await updateContactService(
+    id,
+    name,
+    email,
+    phone,
+    userId
+  );
 
   if (updatedContact) {
     res.status(200).json(updatedContact);
@@ -87,8 +98,8 @@ const patchUpdateContact = async (req, res) => {
         .status(400)
         .json({ message: "Favorite must be a boolean value" });
     }
-
-    const updatedContact = await updateStatusContact(id, favorite);
+    const userId = req.user._id;
+    const updatedContact = await updateStatusContact(id, favorite, userId);
 
     if (updatedContact) {
       res.status(200).json(updatedContact);
