@@ -1,6 +1,6 @@
 const Contact = require("../schemas/mongoSchema.js");
 const HttpError = require("../helpers/HttpError.js");
-const { updateContact } = require("../controllers/contactsControll.js");
+const updateContact = require("../controllers/contactsControll.js");
 
 const listContacts = async (userId) => {
   try {
@@ -14,7 +14,7 @@ const listContacts = async (userId) => {
 const getContactById = async (contactId, userId) => {
   try {
     const contact = await Contact.findOne({ _id: contactId, owner: userId });
-    
+
     if (!contact) {
       throw Error(404, "Contact not found");
     }
@@ -22,7 +22,7 @@ const getContactById = async (contactId, userId) => {
   } catch (error) {
     throw HttpError(500, "Internal Server Error");
   }
-}
+};
 
 const removeContact = async (contactId, userId) => {
   try {
@@ -41,12 +41,17 @@ const removeContact = async (contactId, userId) => {
 
 const addContact = async (name, email, phone, userId) => {
   try {
-    const newContact = await Contact.create({ name, email, phone, owner: userId });
+    const newContact = await Contact.create({
+      name,
+      email,
+      phone,
+      owner: userId,
+    });
     return newContact;
   } catch (error) {
-     throw HttpError(500, "Internal Server Error");
+    throw HttpError(500, "Internal Server Error");
   }
-}
+};
 
 const updateContactService = async (contactId, name, email, phone, userId) => {
   try {

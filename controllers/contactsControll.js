@@ -10,7 +10,7 @@ const {
 const {
   createContactSchema,
   updateContactSchema,
-} = require("../schemas/contactsSchema.js");
+} = require("../schemas/contactsSchema");
 
 const listContactsAll = async (req, res, next) => {
   try {
