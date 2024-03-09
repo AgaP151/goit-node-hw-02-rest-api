@@ -1,6 +1,8 @@
 const express = require("express");
 const {
   register,
+  verifyEmail,
+  resendVerifyEmail,
   login,
   getCurrent,
   logout,
@@ -15,6 +17,14 @@ const upload = require("../../helpers/upload");
 const authRouter = express.Router();
 
 authRouter.post("/signup", validateBody(schemas.registerSchema), register);
+
+authRouter.get("/verify/:verificationToken", verifyEmail);
+
+authRouter.post(
+  "/verify",
+  validateBody(schemas.emailSchema),
+  resendVerifyEmail
+);
 
 authRouter.post("/login", validateBody(schemas.loginSchema), login);
 
